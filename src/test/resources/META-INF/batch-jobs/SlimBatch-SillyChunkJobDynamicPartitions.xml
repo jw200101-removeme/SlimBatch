@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<job id="SillyJob-DynamicPartitions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="./slim-batch.xsd">
+	<properties>
+		<property name="JobParmNumberOfRows" value="100000" type="int" />
+		<property name="JobParmPartitions" value="50" type="int" />
+	</properties>
+	<listeners>
+		<listener ref="SillyJobListener" />
+	</listeners>
+
+	<step id="SillyPartitionedStep">
+		<transaction commitSize="20" datasource="dataSource" />
+		<partition>
+			<mapper ref="SillyPartitionMapper">
+				<properties>
+					<property name="NumberOfRows" value="${JobParmNumberOfRows}" type="int" />
+					<property name="Partitions" value="${JobParmPartitions}" type="int" />
+				</properties>
+			</mapper>
+		</partition>
+		<chunk items="10" skips="100" retrys="10">
+			<reader ref="SillyItemReader" />
+			<processor ref="SillyItemProcessor" />
+			<writer ref="SillyItemWriter" />
+		</chunk>
+	</step>
+</job>
